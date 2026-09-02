@@ -11,7 +11,7 @@ public class ProxyServer implements Runnable {
     private static final int DEFAULT_PORT = 8000;
     private static final int THREAD_POOL_SIZE = 16;
 
-    private final int port;
+    private final int port; 
     private final HttpCache cache;
     private final ExecutorService threadPool;
     private ServerSocket serverSocket;
