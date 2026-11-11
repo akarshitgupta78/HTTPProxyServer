@@ -1,0 +1,19 @@
+# Compiled Java class files & build directories
+*.class
+bin/
+target/
+
+# IDE Metadata
+.project
+.classpath
+.settings/
+.idea/
+*.iml
+.vscode/
+
+# Build & OS Artifacts
+cached/
+*.txt
+*.log
+.DS_Store
+Thumbs.db
