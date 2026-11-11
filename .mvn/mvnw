@@ -1,0 +1,28 @@
+#!/bin/sh
+# ----------------------------------------------------------------------------
+# Maven Wrapper Shell Script for Linux / macOS (Located in .mvn/)
+# ----------------------------------------------------------------------------
+
+set -e
+
+DIR="$(cd "$(dirname "$0")" && pwd)"
+WRAPPER_JAR="$DIR/wrapper/maven-wrapper.jar"
+
+if [ ! -d "$DIR/wrapper" ]; then
+    mkdir -p "$DIR/wrapper"
+fi
+
+if [ ! -f "$WRAPPER_JAR" ]; then
+    echo "Downloading Maven Wrapper JAR..."
+    curl -sLo "$WRAPPER_JAR" "https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.2.0/maven-wrapper-3.2.0.jar" || \
+    wget -qO "$WRAPPER_JAR" "https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.2.0/maven-wrapper-3.2.0.jar"
+fi
+
+if [ -n "$JAVA_HOME" ] && [ -x "$JAVA_HOME/bin/java" ]; then
+    JAVA_EXE="$JAVA_HOME/bin/java"
+else
+    JAVA_EXE="java"
+fi
+
+exec "$JAVA_EXE" -jar "$WRAPPER_JAR" "$@"
+
