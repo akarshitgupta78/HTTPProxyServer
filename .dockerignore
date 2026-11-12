@@ -1,0 +1,9 @@
+target/
+bin/
+.git/
+.gitignore
+.idea/
+*.class
+*.log
+.gemini/
+
