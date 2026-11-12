@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTTP Proxy Server - Management Console</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-blue: #38bdf8;
+            --accent-green: #34d399;
+            --accent-red: #f87171;
+            --accent-amber: #fbbf24;
+            --border-color: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 24px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .status-badge {
+            background-color: rgba(52, 211, 153, 0.15);
+            color: var(--accent-green);
+            padding: 6px 12px;
+            border-radius: 9999px;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .grid-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .card-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .card-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .card-subtext {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .btn {
+            background-color: var(--accent-blue);
+            color: #0f172a;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background-color: var(--accent-red);
+            color: white;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--bg-secondary);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-card);
+            margin-bottom: 24px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.875rem;
+        }
+
+        th {
+            background-color: rgba(15, 23, 42, 0.6);
+            color: var(--text-secondary);
+            padding: 12px 16px;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .uri-cell {
+            max-width: 450px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: var(--accent-blue);
+            font-family: monospace;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-hit {
+            background-color: rgba(52, 211, 153, 0.15);
+            color: var(--accent-green);
+        }
+
+        .badge-miss {
+            background-color: rgba(251, 191, 36, 0.15);
+            color: var(--accent-amber);
+        }
+
+        .actions-cell {
+            text-align: right;
+        }
+
+        .empty-state {
+            padding: 48px;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        .config-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) 120px;
+            gap: 16px;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        label {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        input {
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.875rem;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--accent-green);
+            color: var(--text-primary);
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">PX</div>
+                <div>
+                    <h1>HTTP Proxy Server</h1>
+                    <div class="subtitle">Java 21 Virtual Threads & In-Memory LRU Cache Console</div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <button class="btn btn-outline" onclick="loadData()">Refresh</button>
+                <div class="status-badge">
+                    <span class="status-dot"></span>
+                    <span id="server-status">RUNNING (Port 8000)</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stats Grid -->
+        <div class="grid-stats">
+            <div class="card">
+                <div class="card-title">Cache Hit Ratio</div>
+                <div class="card-value" id="hit-ratio">--%</div>
+                <div class="card-subtext" id="hit-count-sub">0 Hits / 0 Misses</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Total Requests</div>
+                <div class="card-value" id="total-requests">0</div>
+                <div class="card-subtext" id="active-connections-sub">0 Active Connections</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Cached Entries</div>
+                <div class="card-value" id="cache-size">0</div>
+                <div class="card-subtext" id="capacity-sub">Capacity: 500</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Memory Footprint</div>
+                <div class="card-value" id="memory-usage">0 KB</div>
+                <div class="card-subtext" id="evictions-sub">0 Evictions Recorded</div>
+            </div>
+        </div>
+
+        <!-- In-Memory Cache Explorer -->
+        <div class="section-header">
+            <div class="section-title">In-Memory Cache Entries</div>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn btn-danger" onclick="clearCache()">Flush All Cache</button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Target URI</th>
+                        <th>Payload Size</th>
+                        <th>Hits Served</th>
+                        <th>Remaining TTL</th>
+                        <th class="actions-cell">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="cache-table-body">
+                    <tr>
+                        <td colspan="5" class="empty-state">Loading cache state...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Dynamic Configuration Panel -->
+        <div class="section-header">
+            <div class="section-title">Cache Configuration</div>
+        </div>
+        <div class="config-card">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Max Item Capacity</label>
+                    <input type="number" id="input-capacity" placeholder="e.g. 500">
+                </div>
+                <div class="form-group">
+                    <label>Default TTL (ms)</label>
+                    <input type="number" id="input-ttl" placeholder="e.g. 60000">
+                </div>
+                <div class="form-group">
+                    <label>Max Memory Budget (MB)</label>
+                    <input type="number" id="input-memory" placeholder="e.g. 50">
+                </div>
+                <button class="btn" onclick="updateConfig()">Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">Settings updated!</div>
+
+    <script>
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+        }
+
+        function formatBytes(bytes) {
+            if (!bytes || bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        async function loadData() {
+            try {
+                const [statsRes, cacheRes] = await Promise.all([
+                    fetch('/api/proxy/stats'),
+                    fetch('/api/proxy/cache')
+                ]);
+
+                if (statsRes.ok) {
+                    const stats = await statsRes.json();
+                    document.getElementById('hit-ratio').textContent = stats.hitRatioPercent + '%';
+                    document.getElementById('hit-count-sub').textContent = `${stats.cacheHits} Hits / ${stats.cacheMisses} Misses`;
+                    document.getElementById('total-requests').textContent = (stats.cacheHits + stats.cacheMisses).toLocaleString();
+                    document.getElementById('active-connections-sub').textContent = `${stats.activeConnections} Active / ${stats.totalAcceptedConnections} Total`;
+                    document.getElementById('cache-size').textContent = stats.currentCacheSize;
+                    document.getElementById('capacity-sub').textContent = `Max Capacity: ${stats.maxCapacity}`;
+                    document.getElementById('memory-usage').textContent = formatBytes(stats.currentMemoryBytes);
+                    document.getElementById('evictions-sub').textContent = `${stats.cacheEvictions} Evictions Recorded`;
+                    document.getElementById('server-status').textContent = `${stats.status} (Port ${stats.proxyPort})`;
+
+                    document.getElementById('input-capacity').value = stats.maxCapacity;
+                    document.getElementById('input-ttl').value = stats.defaultTtlMs || 60000;
+                    document.getElementById('input-memory').value = Math.round(stats.maxMemoryBytes / (1024 * 1024));
+                }
+
+                if (cacheRes.ok) {
+                    const entries = await cacheRes.json();
+                    const tbody = document.getElementById('cache-table-body');
+                    if (entries.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No items currently cached in memory.</td></tr>';
+                    } else {
+                        tbody.innerHTML = entries.map(e => `
+                            <tr>
+                                <td class="uri-cell" title="${e.uri}">${e.uri}</td>
+                                <td>${formatBytes(e.sizeBytes)}</td>
+                                <td><span class="badge badge-hit">${e.hits} hits</span></td>
+                                <td>${Math.round(e.remainingTtlMs / 1000)}s</td>
+                                <td class="actions-cell">
+                                    <button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem;" onclick="evictEntry('${encodeURIComponent(e.uri)}')">Evict</button>
+                                </td>
+                            </tr>
+                        `).join('');
+                    }
+                }
+            } catch (err) {
+                console.error("Error fetching proxy metrics:", err);
+            }
+        }
+
+        async function clearCache() {
+            if (!confirm("Are you sure you want to flush all cached entries?")) return;
+            const res = await fetch('/api/proxy/cache', { method: 'DELETE' });
+            if (res.ok) {
+                showToast("In-memory cache cleared!");
+                loadData();
+            }
+        }
+
+        async function evictEntry(encodedUri) {
+            const res = await fetch(`/api/proxy/cache/entry?uri=${encodedUri}`, { method: 'DELETE' });
+            if (res.ok) {
+                showToast("Cache entry evicted!");
+                loadData();
+            }
+        }
+
+        async function updateConfig() {
+            const capacity = parseInt(document.getElementById('input-capacity').value);
+            const ttl = parseInt(document.getElementById('input-ttl').value);
+            const memMB = parseInt(document.getElementById('input-memory').value);
+
+            const res = await fetch('/api/proxy/config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    maxCapacity: capacity,
+                    defaultTtlMs: ttl,
+                    maxMemoryBytes: memMB * 1024 * 1024
+                })
+            });
+
+            if (res.ok) {
+                showToast("Configuration saved successfully!");
+                loadData();
+            }
+        }
+
+        loadData();
+        setInterval(loadData, 3000);
+    </script>
+</body>
+</html>
+
