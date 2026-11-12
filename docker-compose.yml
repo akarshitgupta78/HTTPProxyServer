@@ -1,0 +1,28 @@
+services:
+  http-proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: caching-http-proxy
+    ports:
+      - "8000:8000"  # HTTP Forward Proxy & HTTPS CONNECT Tunnel
+      - "8080:8080"  # Spring Boot Management & Actuator APIs
+    environment:
+      - SERVER_PORT=8080
+      - PROXY_PORT=8000
+      - PROXY_CACHE_MAX_CAPACITY=1000
+      - PROXY_CACHE_DEFAULT_TTL_MS=60000
+      - PROXY_CACHE_MAX_MEMORY_BYTES=104857600  # 100 MB cache limit
+      - JAVA_OPTS=-XX:+UseZGC -XX:MaxRAMPercentage=75.0
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 512M
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
